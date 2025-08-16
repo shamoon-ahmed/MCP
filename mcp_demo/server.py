@@ -27,4 +27,11 @@ def say_hello(name: str = Field(description="Name of the user")):
 def list_docs() -> list[str]:
     return list(docs.keys())
 
+@mcp.resource(
+    "docs://documents/{doc_id}",
+    mime_type="application/json"
+)
+def read_resource(doc_id: str = Field(description="id of the document to read. For example: plan.md OR report.pdf")):
+    return docs[doc_id]
+
 mcp_app = mcp.streamable_http_app()

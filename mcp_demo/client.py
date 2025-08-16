@@ -25,6 +25,7 @@ from contextlib import AsyncExitStack
 from mcp.client.streamable_http import streamablehttp_client
 import asyncio
 import json
+from pydantic import AnyUrl
 
 class MCPClient:
     def __init__(self, url):
@@ -50,6 +51,11 @@ class MCPClient:
             res = json.load(resources)
             return res
         return resources
+    
+    async def read_resource(self, uri, doc_id) -> types.ReadResourceResult:
+        doc_uri = uri + doc_id
+        resource = await self._sess.read_resource(AnyUrl(doc_uri))
+        return resource
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.stack.aclose()
@@ -58,7 +64,9 @@ async def main():
     async with MCPClient(url="http://localhost:8000/mcp/") as client:
         tools = await client.list_tools()
         print("Tools : ", tools)
-        resources = await client.list_resources("docs://documents")
+        resources = await client.list_resources(" ")
         print("\n Resources: ", resources)
+        resource = await client.read_resource("docs://documents/", 'report.pdf')
+        print("\n Resource Content: ", resource)
 
 asyncio.run(main())
